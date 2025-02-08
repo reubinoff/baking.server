@@ -1,0 +1,27 @@
+[project]
+name = "server"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "reubinoff",email = "reubinoff@gmail.com"}
+]
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "fastapi (>=0.115.8,<0.116.0)",
+    "sqlmodel (>=0.0.22,<0.0.23)",
+    "pydantic-settings (>=2.7.1,<3.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.4"
+ruff = "^0.9.5"
+mypy = "^1.15.0"
+uvicorn = "^0.34.0"
+flake8 = "^7.1.1"
+
