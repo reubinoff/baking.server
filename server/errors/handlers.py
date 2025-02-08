@@ -24,7 +24,7 @@ class BaseBakingError(Exception):
 
 class FieldNotFound(BaseBakingError):
     http_status_code = status.HTTP_404_NOT_FOUND
-    code = ErrorCode.E1000_FIELD_NOT_FOUND
+    code = ErrorCode.E1000_FIELD_NOT_FOUND.name
 
     def __init__(self, field_name: str):
         self.field_name = field_name
@@ -34,7 +34,7 @@ class FieldNotFound(BaseBakingError):
 
 
 class FieldNotFoundError(PydanticUserError):
-    code = ErrorCode.E1000_FIELD_NOT_FOUND
+    code = ErrorCode.E1000_FIELD_NOT_FOUND.name
 
     def __init__(self, field_name: str):
         self.field_name = field_name
@@ -45,7 +45,7 @@ class FieldNotFoundError(PydanticUserError):
 
 class BadFilterFormat(Exception):
     http_status_code = status.HTTP_400_BAD_REQUEST
-    code = ErrorCode.E1001_BAD_FILTER_FORMAT
+    code = ErrorCode.E1001_BAD_FILTER_FORMAT.name
 
     def __init__(self, filter_name: str):
         self.filter_name = filter_name
@@ -55,7 +55,7 @@ class BadFilterFormat(Exception):
 
 
 class InvalidFilterError(PydanticUserError):
-    code = ErrorCode.E1002_INVALID_FILTER
+    code = ErrorCode.E1002_INVALID_FILTER.name
 
     def __init__(self, filter_name: str):
         self.filter_name = filter_name

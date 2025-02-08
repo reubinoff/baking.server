@@ -2,9 +2,11 @@ from fastapi import FastAPI
 
 from server.logger import init_logger
 from server.middlewares import get_middlewares
+from server.routers import health_router
 
 init_logger()
 
+routers = [health_router]
 
 app = FastAPI(
     title="Baking Hub",
@@ -13,8 +15,5 @@ app = FastAPI(
     middleware=get_middlewares(),
 )
 
-
-# Basic health check endpoint
-@app.get("/health")
-async def health_check() -> dict[str, str]:
-    return {"status": "healthy"}
+for router in routers:
+    app.include_router(router)

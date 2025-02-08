@@ -43,7 +43,7 @@ async def add_security_headers(
     return response
 
 
-async def exceptions(request: Request, call_next) -> Response:
+async def exceptions(request: Request, call_next: Callable[[Request], Awaitable[Response]]) -> Response:
     try:
         response = await call_next(request)
     except ValidationError as e:
