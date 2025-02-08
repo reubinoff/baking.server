@@ -1,0 +1,100 @@
+name: server-ci
+
+on:
+  push:
+    branches: [ develop, main]
+
+permissions:
+  id-token: write
+  contents: read
+  checks: write
+
+jobs:
+    test:
+        runs-on: ubuntu-latest
+        services:
+          postgres:
+            image: postgres
+            env:
+              POSTGRES_PASSWORD: db_pipeline_password
+              POSTGRES_USER: db_pipeline_user
+              POSTGRES_DB: pipeline_test_db_${{ github.run_id }}
+            options: >-
+              --health-cmd pg_isready
+              --health-interval 10s
+              --health-timeout 5s
+              --health-retries 5
+            ports:
+              - 5432:5432
+
+        steps:
+        - name: 'Checkout GitHub Action'
+          uses: actions/checkout@v4
+
+        - uses: actions/setup-python@v5
+          with:
+            python-version: '3.13' 
+
+        - name: Install Poetry
+          uses: snok/install-poetry@v1
+
+        - name: 'Run Pytests'
+          run: |
+            cd server
+            poetry env use 3.13
+            poetry install 
+            poetry run python -m pytest -xv --cov=server/routers --cov-fail-under=80 --cov-report html  --junit-xml=../pytest-report.xml
+        - name: Test Report
+          uses: dorny/test-reporter@v1
+          if: success() || failure()    # run this step even if previous step failed
+          with:
+            name: Tests results
+            path: pytest-report.xml
+            reporter: java-junit 
+
+    # build:
+    #     runs-on: ubuntu-latest
+    #     needs: test
+    #     env:
+    #       BASE_REPO: reubinoff/baking
+    #       REGISTRY: reubinoff.azurecr.io
+    #     steps:
+    #     - name: 'Checkout GitHub Action'
+    #       uses: actions/checkout@v4
+
+    #     - name: 'Log in to the Container registry'
+    #       uses: azure/docker-login@v2
+    #       with:
+    #         login-server: ${{ env.REGISTRY }}
+    #         username: ${{ secrets.REGISTRY_USERNAME }}
+    #         password: ${{ secrets.REGISTRY_PASSWORD }}
+
+
+    #     - name: Build And Publish Docker
+    #       run: |
+    #         cd server
+    #         docker compose build
+    #         docker tag ${{ env.BASE_REPO }}:latest ${{ env.REGISTRY }}/${{ env.BASE_REPO }}:${{ github.sha }}
+    #         docker tag ${{ env.BASE_REPO }}:latest ${{ env.REGISTRY }}/${{ env.BASE_REPO }}:latest
+    #         docker push ${{ env.REGISTRY }}/${{ env.BASE_REPO }}:${{ github.sha }}
+    #         docker push ${{ env.REGISTRY }}/${{ env.BASE_REPO }}:latest
+
+    # deploy:
+    #   runs-on: ubuntu-latest
+    #   needs: build
+    #   env:
+    #     AZURE_WEBAPP_NAME: baking-service
+    #     BASE_REPO: reubinoff/baking
+    #     REGISTRY: reubinoff.azurecr.io
+    #   steps:
+    #     - uses: azure/webapps-deploy@v3
+    #       with:
+    #         app-name: ${{ env.AZURE_WEBAPP_NAME }}
+    #         images: ${{ env.REGISTRY }}/${{ env.BASE_REPO }}:${{ github.sha }}
+    #         publish-profile: ${{ secrets.AZURE_WEBSITE_CREDENTIALS }}
+        
+    #     - name: 'create get request to server'
+    #       run: |
+    #         curl https://service.baking.reubinoff.com/recipe?page=1&itemsPerPage=10
+
+
