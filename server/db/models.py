@@ -1,7 +1,10 @@
 from datetime import UTC, datetime
+from typing import Annotated
 
 import sqlalchemy as sa
 from sqlmodel import DateTime, Field, SQLModel
+
+RecipeIdType = Annotated[int, Field(ge=1)]
 
 
 def utcnow() -> datetime:
